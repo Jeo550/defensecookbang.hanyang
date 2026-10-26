@@ -4,11 +4,17 @@
 
 ## 진행 상황
 
-1. **로그인과 역할** ← 지금 단계
+1. **로그인과 역할** ✅
    - 학교 이메일(@hanyang.ac.kr)로만 로그인 (메일로 받은 링크를 누르는 방식, 비밀번호 없음)
    - 역할 3단계: 관리자 / 글쓰기 권한자 / 학우
    - 관리자는 `회원 관리` 화면에서 글쓰기 권한자를 임명
-2. 게시판(공지, 과제, 자유게시판·댓글)과 1~4학년 과목 자료실
+2. **게시판과 과목 자료실** ← 지금 단계
+   - 학교 공지, 학과 공지, 과제(과목·마감일): 글쓰기 권한자만 작성
+   - 자유게시판: 누구나 작성
+   - 모든 글에 댓글
+   - 과목 자료실: 1~4학년 → 과목 → 강의자료 / 과제 / 시험 대비 / 기타. 파일(20MB까지) 또는 구글 드라이브 링크
+   - 관리자는 `과목 관리`에서 과목 추가·삭제
+   - `내 정보`에서 이름과 학년 입력
 3. 공부·운동 기록, 캘린더, 새 공지 알림
 4. 배포와 시범 운영
 
@@ -22,7 +28,7 @@
 ### 1. Supabase 프로젝트 만들기
 
 1. https://supabase.com 에 가입하고 **New project** 를 만듭니다. 지역은 `Northeast Asia (Seoul)` 을 고릅니다.
-2. 왼쪽 메뉴 **SQL Editor** 에서 `supabase/migrations/0001_profiles_and_roles.sql` 내용을 붙여넣고 **Run** 합니다.
+2. 왼쪽 메뉴 **SQL Editor** 에서 `supabase/migrations/` 폴더의 파일을 번호 순서대로(0001, 0002, ...) 하나씩 붙여넣고 **Run** 합니다.
 3. **Authentication → URL Configuration** 에서
    - Site URL: 사이트 주소 (개발 중에는 `http://localhost:3000`)
    - Redirect URLs: `http://localhost:3000/auth/callback` 와 배포 주소의 `/auth/callback`
@@ -49,4 +55,5 @@ update public.profiles set role = 'admin' where email = '본인메일@hanyang.ac
 ## 알아둘 점
 
 - Supabase 기본 메일 발송은 시간당 몇 통으로 제한돼 있어요. 학우들이 실제로 쓰기 전(4단계)에 Gmail 같은 SMTP를 연결해야 합니다.
+- Supabase 무료 요금제의 파일 저장 공간은 1GB예요. 큰 자료는 구글 드라이브에 올리고 링크로 거는 걸 추천해요.
 - 학교 메일만 가입되도록 데이터베이스에서도 한 번 더 막고 있어요 (`handle_new_user` 함수).
