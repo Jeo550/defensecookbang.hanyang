@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentProfile, ROLE_LABELS } from "@/lib/auth";
+import { countUnreadNotices } from "@/lib/notices";
 
 const NAV = [
   { href: "/board/school_notice", label: "학교 공지" },
@@ -7,10 +8,13 @@ const NAV = [
   { href: "/board/assignment", label: "과제" },
   { href: "/subjects", label: "자료실" },
   { href: "/board/free", label: "자유게시판" },
+  { href: "/calendar", label: "캘린더" },
+  { href: "/records", label: "내 기록" },
 ];
 
 export async function Header() {
   const profile = await getCurrentProfile();
+  const unread = profile ? await countUnreadNotices(profile) : 0;
 
   return (
     <header className="bg-navy text-white">
@@ -20,6 +24,14 @@ export async function Header() {
         </Link>
         {profile && (
           <div className="flex items-center gap-4 text-sm">
+            <Link href="/notifications" className="relative hover:text-accent" aria-label="알림">
+              알림
+              {unread > 0 && (
+                <span className="absolute -right-3 -top-2 rounded-full bg-red-600 px-1.5 text-[10px] font-bold">
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              )}
+            </Link>
             <Link href="/me" className="hidden text-slate-300 hover:text-white sm:inline">
               {profile.name ?? profile.email} · {ROLE_LABELS[profile.role]}
             </Link>
