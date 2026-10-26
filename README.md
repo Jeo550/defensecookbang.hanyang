@@ -1,0 +1,52 @@
+# 국방전략기술공학과 BlackBoard
+
+한양대학교 ERICA 국방전략기술공학과 학우들을 위한 공지·과제·과목 자료실·공부/운동 기록 사이트입니다.
+
+## 진행 상황
+
+1. **로그인과 역할** ← 지금 단계
+   - 학교 이메일(@hanyang.ac.kr)로만 로그인 (메일로 받은 링크를 누르는 방식, 비밀번호 없음)
+   - 역할 3단계: 관리자 / 글쓰기 권한자 / 학우
+   - 관리자는 `회원 관리` 화면에서 글쓰기 권한자를 임명
+2. 게시판(공지, 과제, 자유게시판·댓글)과 1~4학년 과목 자료실
+3. 공부·운동 기록, 캘린더, 새 공지 알림
+4. 배포와 시범 운영
+
+## 기술 구성
+
+- [Next.js](https://nextjs.org) (화면과 서버)
+- [Supabase](https://supabase.com) (로그인, 데이터베이스, 파일 저장). 무료 요금제로 200명 규모까지 운영할 수 있어요.
+
+## 처음 설정하기
+
+### 1. Supabase 프로젝트 만들기
+
+1. https://supabase.com 에 가입하고 **New project** 를 만듭니다. 지역은 `Northeast Asia (Seoul)` 을 고릅니다.
+2. 왼쪽 메뉴 **SQL Editor** 에서 `supabase/migrations/0001_profiles_and_roles.sql` 내용을 붙여넣고 **Run** 합니다.
+3. **Authentication → URL Configuration** 에서
+   - Site URL: 사이트 주소 (개발 중에는 `http://localhost:3000`)
+   - Redirect URLs: `http://localhost:3000/auth/callback` 와 배포 주소의 `/auth/callback`
+4. **Project Settings → API** 에서 `Project URL` 과 `anon public` 키를 복사합니다.
+
+### 2. 내 컴퓨터에서 실행하기
+
+```bash
+cp .env.example .env.local   # 복사한 URL과 키를 채워 넣기
+npm install
+npm run dev                  # http://localhost:3000
+```
+
+### 3. 첫 관리자 지정하기
+
+본인 학교 메일로 한 번 로그인한 뒤, Supabase **SQL Editor** 에서 실행합니다.
+
+```sql
+update public.profiles set role = 'admin' where email = '본인메일@hanyang.ac.kr';
+```
+
+그다음부터는 사이트의 `회원 관리` 화면에서 다른 학우를 임명할 수 있어요.
+
+## 알아둘 점
+
+- Supabase 기본 메일 발송은 시간당 몇 통으로 제한돼 있어요. 학우들이 실제로 쓰기 전(4단계)에 Gmail 같은 SMTP를 연결해야 합니다.
+- 학교 메일만 가입되도록 데이터베이스에서도 한 번 더 막고 있어요 (`handle_new_user` 함수).
