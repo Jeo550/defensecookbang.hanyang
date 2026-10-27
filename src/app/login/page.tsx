@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ?? "hanyang.ac.kr";
@@ -9,6 +9,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  // 메일 링크 로그인에 실패하면 /login?error=... 로 돌아온다.
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (error) {
+      setStatus("error");
+      setMessage(`로그인에 실패했어요 (${error}). 로그인 링크를 다시 받아 주세요.`);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
