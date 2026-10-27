@@ -9,6 +9,7 @@ export type Profile = {
   name: string | null;
   student_year: number | null;
   role: Role;
+  notices_seen_at?: string;
   created_at: string;
 };
 
