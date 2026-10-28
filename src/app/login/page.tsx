@@ -5,6 +5,17 @@ import { createClient } from "@supabase/supabase-js";
 
 const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ?? "hanyang.ac.kr";
 
+// 메일 발송 실패 이유를 알려 줘야 관리자가 설정 문제인지 횟수 제한인지 구분할 수 있다.
+function sendErrorMessage(error: { status?: number; code?: string; message: string }) {
+  if (error.status === 429 || error.code?.startsWith("over_")) {
+    return "짧은 시간에 너무 많이 요청했어요. 1분 뒤에 다시 시도해 주세요. 계속 안 되면 1시간 뒤에 시도해 주세요.";
+  }
+  if (error.message.toLowerCase().includes("sending")) {
+    return `메일 서버 설정에 문제가 있어 메일을 보내지 못했어요. 관리자에게 알려 주세요. (${error.message})`;
+  }
+  return `메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요. (${error.message})`;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -43,7 +54,7 @@ export default function LoginPage() {
 
     if (error) {
       setStatus("error");
-      setMessage("메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+      setMessage(sendErrorMessage(error));
       return;
     }
     setStatus("sent");
