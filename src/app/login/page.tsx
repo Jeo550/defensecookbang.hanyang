@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ?? "hanyang.ac.kr";
 
@@ -9,6 +9,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  // 메일 링크 로그인에 실패하면 /login?error=... 로 돌아온다.
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (error) {
+      setStatus("error");
+      setMessage(`로그인에 실패했어요 (${error}). 로그인 링크를 다시 받아 주세요.`);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,10 +30,15 @@ export default function LoginPage() {
     }
 
     setStatus("sending");
-    const supabase = createClient();
+    // 메일 보내기에만 쓰는 클라이언트. implicit 방식이라 링크를 다른 기기에서 눌러도 된다 (/auth/finish 참고).
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } },
+    );
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/finish` },
     });
 
     if (error) {

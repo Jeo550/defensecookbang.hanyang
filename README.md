@@ -35,7 +35,7 @@
 2. 왼쪽 메뉴 **SQL Editor** 에서 `supabase/migrations/` 폴더의 파일을 번호 순서대로(0001, 0002, ...) 하나씩 붙여넣고 **Run** 합니다.
 3. **Authentication → URL Configuration** 에서
    - Site URL: 사이트 주소 (개발 중에는 `http://localhost:3000`)
-   - Redirect URLs: `http://localhost:3000/auth/callback` 와 배포 주소의 `/auth/callback`
+   - Redirect URLs: `http://localhost:3000/auth/finish` 와 배포 주소의 `/auth/finish`
 4. **Project Settings → API** 에서 `Project URL` 과 `anon public` 키를 복사합니다.
 
 ### 2. 내 컴퓨터에서 실행하기
