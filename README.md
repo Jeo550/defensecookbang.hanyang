@@ -59,7 +59,12 @@ update public.profiles set role = 'admin', approved = true where username = '내
 
 ## 알아둘 점
 
-- 비밀번호를 잊으면 메일로 찾을 수 없어요. 관리자가 Supabase **Authentication → Users** 에서 그 사람을 지우면 같은 아이디로 다시 가입할 수 있어요.
+- 비밀번호를 잊으면 메일로 찾을 수 없어요. 관리자가 Supabase **SQL Editor** 에서 임시 비밀번호를 정해 주고, 본인이 `내 정보`에서 바꾸게 하세요.
+
+  ```sql
+  update auth.users set encrypted_password = extensions.crypt('임시비밀번호', extensions.gen_salt('bf'))
+  where email = '아이디@users.defensecookbang.invalid';
+  ```
 - 예전에 학교 메일로 가입한 계정은 `내 정보`에서 비밀번호를 정한 뒤, 아이디 칸에 학교 메일 전체를 넣어 로그인합니다.
 - Supabase 무료 요금제의 파일 저장 공간은 1GB예요. 큰 자료는 구글 드라이브에 올리고 링크로 거는 걸 추천해요.
 - 승인 전에는 데이터베이스(RLS)에서도 게시글·자료·일정을 볼 수 없게 막고 있어요 (`is_approved` 함수).
