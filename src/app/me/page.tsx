@@ -1,5 +1,6 @@
 import { requireProfile, ROLE_LABELS } from "@/lib/auth";
 import { updateMyProfile } from "./actions";
+import { PasswordForm } from "./PasswordForm";
 
 export default async function MePage() {
   const profile = await requireProfile();
@@ -9,7 +10,7 @@ export default async function MePage() {
     <div className="max-w-md">
       <h1 className="text-2xl font-bold text-navy">내 정보</h1>
       <p className="mt-1 text-sm text-slate-600">
-        {profile.email} · {ROLE_LABELS[profile.role]}
+        {profile.username ? `아이디 ${profile.username}` : `아이디 ${profile.email}`} · {ROLE_LABELS[profile.role]}
       </p>
       <form action={updateMyProfile} className="mt-6 space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <label className="block text-sm">
@@ -31,6 +32,7 @@ export default async function MePage() {
           저장
         </button>
       </form>
+      <PasswordForm input={input} />
     </div>
   );
 }

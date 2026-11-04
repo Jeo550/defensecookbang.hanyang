@@ -21,3 +21,26 @@ export async function changeRole(formData: FormData) {
 
   revalidatePath("/admin/members");
 }
+
+export async function approveMember(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get("userId"));
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ approved: true }).eq("id", userId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/members");
+}
+
+// 가입 신청 거절: 계정을 지워서 같은 아이디로 다시 신청할 수 있게 한다.
+export async function rejectMember(formData: FormData) {
+  await requireAdmin();
+  const userId = String(formData.get("userId"));
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("reject_signup", { target: userId });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/admin/members");
+}

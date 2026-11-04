@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentProfile, ROLE_LABELS } from "@/lib/auth";
+import { displayName, getCurrentProfile, ROLE_LABELS } from "@/lib/auth";
 import { countUnreadNotices } from "@/lib/notices";
 
 const NAV = [
@@ -14,7 +14,8 @@ const NAV = [
 
 export async function Header() {
   const profile = await getCurrentProfile();
-  const unread = profile ? await countUnreadNotices(profile) : 0;
+  const approved = profile?.approved ?? false;
+  const unread = profile && approved ? await countUnreadNotices(profile) : 0;
 
   return (
     <header className="bg-navy text-white">
@@ -22,7 +23,7 @@ export async function Header() {
         <Link href="/" className="font-bold tracking-tight">
           국방전략기술공학과 <span className="text-accent">BlackBoard</span>
         </Link>
-        {profile && (
+        {profile && approved && (
           <div className="flex items-center gap-4 text-sm">
             <Link href="/notifications" className="relative hover:text-accent" aria-label="알림">
               알림
@@ -33,7 +34,7 @@ export async function Header() {
               )}
             </Link>
             <Link href="/me" className="hidden text-slate-300 hover:text-white sm:inline">
-              {profile.name ?? profile.email} · {ROLE_LABELS[profile.role]}
+              {displayName(profile)} · {ROLE_LABELS[profile.role]}
             </Link>
             <form action="/auth/signout" method="post">
               <button className="rounded border border-white/30 px-2 py-1 hover:bg-white/10">로그아웃</button>
@@ -41,7 +42,7 @@ export async function Header() {
           </div>
         )}
       </div>
-      {profile && (
+      {profile && approved && (
         <nav className="border-t border-white/10">
           <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 text-sm">
             {NAV.map((n) => (

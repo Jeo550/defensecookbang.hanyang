@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile, canPost } from "@/lib/auth";
+import { requireProfile, canPost, displayName } from "@/lib/auth";
 import { MATERIAL_KINDS, formatDate, type MaterialKind } from "@/lib/boards";
 import { deleteMaterial, uploadMaterial } from "../actions";
 
@@ -29,7 +29,7 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
 
   const { data } = await supabase
     .from("materials")
-    .select("*, author:profiles(name, email)")
+    .select("*, author:profiles(name, username, email)")
     .eq("subject_id", subject.id)
     .order("created_at", { ascending: false });
   const materials = (data ?? []) as Material[];
@@ -77,7 +77,7 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
                       </div>
                       {m.description && <p className="mt-0.5 text-slate-600">{m.description}</p>}
                       <div className="mt-1 text-xs text-slate-500">
-                        {m.author?.name ?? m.author?.email} · {formatDate(m.created_at)}
+                        {displayName(m.author)} · {formatDate(m.created_at)}
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">

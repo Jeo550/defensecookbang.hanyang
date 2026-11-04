@@ -6,6 +6,8 @@ export type Role = "admin" | "editor" | "member";
 export type Profile = {
   id: string;
   email: string;
+  username: string | null;
+  approved: boolean;
   name: string | null;
   student_year: number | null;
   role: Role;
@@ -33,6 +35,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 export async function requireProfile(): Promise<Profile> {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
+  if (!profile.approved) redirect("/pending");
   return profile;
 }
 
@@ -44,4 +47,9 @@ export async function requireAdmin(): Promise<Profile> {
 
 export function canPost(profile: Pick<Profile, "role"> | null) {
   return profile?.role === "admin" || profile?.role === "editor";
+}
+
+// 화면에 보여줄 이름. 이름이 없으면 아이디, 그것도 없으면 이메일.
+export function displayName(p: { name?: string | null; username?: string | null; email?: string | null } | null | undefined) {
+  return p?.name ?? p?.username ?? p?.email ?? "-";
 }
