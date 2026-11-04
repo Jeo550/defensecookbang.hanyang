@@ -5,7 +5,7 @@
 ## 진행 상황
 
 1. **로그인과 역할** ✅
-   - 학교 이메일(@hanyang.ac.kr)로만 로그인 (메일로 받은 링크를 누르는 방식, 비밀번호 없음)
+   - 누구나 아이디·비밀번호로 가입 신청 → 관리자가 `회원 관리`에서 승인해야 사이트를 쓸 수 있음
    - 역할 3단계: 관리자 / 글쓰기 권한자 / 학우
    - 관리자는 `회원 관리` 화면에서 글쓰기 권한자를 임명
 2. **게시판과 과목 자료실** ✅
@@ -36,6 +36,7 @@
 3. **Authentication → URL Configuration** 에서
    - Site URL: 사이트 주소 (개발 중에는 `http://localhost:3000`)
    - Redirect URLs: `http://localhost:3000/auth/finish` 와 배포 주소의 `/auth/finish`
+   - **Authentication → Sign In / Providers → Email** 에서 **Confirm email** 을 끕니다. 아이디는 실제로 메일을 받을 수 없는 주소(`아이디@users.defensecookbang.invalid`)로 저장되기 때문이에요.
 4. **Project Settings → API** 에서 `Project URL` 과 `anon public` 키를 복사합니다.
 
 ### 2. 내 컴퓨터에서 실행하기
@@ -48,16 +49,22 @@ npm run dev                  # http://localhost:3000
 
 ### 3. 첫 관리자 지정하기
 
-본인 학교 메일로 한 번 로그인한 뒤, Supabase **SQL Editor** 에서 실행합니다.
+사이트에서 회원가입한 뒤, Supabase **SQL Editor** 에서 실행합니다.
 
 ```sql
-update public.profiles set role = 'admin' where email = '본인메일@hanyang.ac.kr';
+update public.profiles set role = 'admin', approved = true where username = '내아이디';
 ```
 
 그다음부터는 사이트의 `회원 관리` 화면에서 다른 학우를 임명할 수 있어요.
 
 ## 알아둘 점
 
-- Supabase 기본 메일 발송은 시간당 몇 통으로 제한돼 있어요. 학우들이 실제로 쓰기 전(4단계)에 Gmail 같은 SMTP를 연결해야 합니다.
+- 비밀번호를 잊으면 메일로 찾을 수 없어요. 관리자가 Supabase **SQL Editor** 에서 임시 비밀번호를 정해 주고, 본인이 `내 정보`에서 바꾸게 하세요.
+
+  ```sql
+  update auth.users set encrypted_password = extensions.crypt('임시비밀번호', extensions.gen_salt('bf'))
+  where email = '아이디@users.defensecookbang.invalid';
+  ```
+- 예전에 학교 메일로 가입한 계정은 `내 정보`에서 비밀번호를 정한 뒤, 아이디 칸에 학교 메일 전체를 넣어 로그인합니다.
 - Supabase 무료 요금제의 파일 저장 공간은 1GB예요. 큰 자료는 구글 드라이브에 올리고 링크로 거는 걸 추천해요.
-- 학교 메일만 가입되도록 데이터베이스에서도 한 번 더 막고 있어요 (`handle_new_user` 함수).
+- 승인 전에는 데이터베이스(RLS)에서도 게시글·자료·일정을 볼 수 없게 막고 있어요 (`is_approved` 함수).

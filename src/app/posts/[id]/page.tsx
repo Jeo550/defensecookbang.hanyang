@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile } from "@/lib/auth";
+import { requireProfile, displayName } from "@/lib/auth";
 import { BOARDS, formatDate, type Board } from "@/lib/boards";
 import { addComment, deleteComment, deletePost } from "@/app/board/actions";
 
@@ -14,14 +14,14 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
   const { data: post } = await supabase
     .from("posts")
-    .select("*, author:profiles(name, email), subject:subjects(name, year)")
+    .select("*, author:profiles(name, username, email), subject:subjects(name, year)")
     .eq("id", Number(id))
     .single();
   if (!post) notFound();
 
   const { data: commentRows } = await supabase
     .from("comments")
-    .select("id, body, created_at, author_id, author:profiles(name, email)")
+    .select("id, body, created_at, author_id, author:profiles(name, username, email)")
     .eq("post_id", post.id)
     .order("created_at");
   const comments = (commentRows ?? []) as unknown as {
@@ -45,7 +45,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <article className="mt-3 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <h1 className="text-xl font-bold">{post.title}</h1>
         <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
-          <span>{author?.name ?? author?.email}</span>
+          <span>{displayName(author)}</span>
           <span>{formatDate(post.created_at, true)}</span>
           {post.subject && (
             <span>
@@ -71,7 +71,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             <li key={c.id} className="rounded-lg bg-white px-4 py-3 text-sm ring-1 ring-slate-200">
               <div className="flex justify-between text-xs text-slate-500">
                 <span>
-                  {c.author?.name ?? c.author?.email} · {formatDate(c.created_at, true)}
+                  {displayName(c.author)} · {formatDate(c.created_at, true)}
                 </span>
                 {(c.author_id === profile.id || profile.role === "admin") && (
                   <form action={deleteComment}>

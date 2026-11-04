@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { requireProfile, canPost } from "@/lib/auth";
+import { requireProfile, canPost, displayName } from "@/lib/auth";
 import { BOARDS, isBoard, formatDate } from "@/lib/boards";
 
 type Row = {
@@ -24,7 +24,7 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
   const { data } = await supabase
     .from("posts")
     .select(
-      "id, title, due_at, created_at, author:profiles(name, email), subject:subjects(name), comments(count)",
+      "id, title, due_at, created_at, author:profiles(name, username, email), subject:subjects(name), comments(count)",
     )
     .eq("board", board)
     .order("created_at", { ascending: false })
@@ -64,7 +64,7 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
                 )}
               </div>
               <div className="mt-1 flex gap-3 text-xs text-slate-500">
-                <span>{p.author?.name ?? p.author?.email}</span>
+                <span>{displayName(p.author)}</span>
                 <span>{formatDate(p.created_at)}</span>
                 {p.due_at && <span className="font-semibold text-red-600">마감 {formatDate(p.due_at, true)}</span>}
               </div>
